@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router-dom'
 
 const Cart = () => {
 
-  const {cartItems, food_list, removeFromCart,getTotalCartAmount} = useContext(StoreContext)
+  const {cartItems, food_list, removeFromCart,getTotalCartAmount,url} = useContext(StoreContext)
 
   const navigate = useNavigate();
 
@@ -24,12 +24,12 @@ const Cart = () => {
         <br />
         <hr />
         
-        {food_list.map((item,index)=>{
+        {food_list.map((item)=>{
           if(cartItems[item._id]>0){
             return(
               <div>
-                <div className="cart-items-title cart-items-item">
-                <img src={item.image} alt="" />
+                <div className="cart-items-title cart-items-item" key={item._id}>
+                <img src={url+"/image/"+item.image} alt="" />
                 <p>{item.name}</p>
                 <p>${item.price}</p>
                 <p>{cartItems[item._id]}</p>
@@ -54,12 +54,12 @@ const Cart = () => {
               <hr />
               <div className="cart-total-details">
                 <p>Delivery Fee</p>
-                <p>${2}</p>
+                <p>${getTotalCartAmount()===0?0:2}</p>
               </div>
               <hr />
               <div className="cart-total-details">
                 <p>Total</p>
-                <p>${getTotalCartAmount()+2}</p>
+                <p>${getTotalCartAmount()===0?0:getTotalCartAmount()+2}</p>
               </div>
 
               <button onClick={()=>navigate('/order')}>PROCEED TO CHECKOUT</button>
