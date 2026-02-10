@@ -7,8 +7,6 @@ import 'dotenv/config'
 import cartRouter from './routes/cartRoute.js'
 import orderRoute from './routes/orderRoute.js'
 
-// upperline: mongodb+srv://kumarisakshi900600:9006005042@cluster0.wyzi0yj.mongodb.net/?
-// Whole: mongodb+srv://kumarisakshi900600:9006005042@cluster0.wyzi0yj.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0
 
 
 // app config
