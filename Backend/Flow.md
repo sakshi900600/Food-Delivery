@@ -328,3 +328,16 @@ inside try: create newOrder using orderModel & get all data from body then save 
 1. go to orderController & create a async fun listOrder then make route using post method.
 
 2. Link this api with admin panel.
+
+
+
+#### Creating dummy users to test:
+name: Sakshi
+email: sakshi@gmail.com
+password: sakshi1234
+
+<!-- stripe payment testing -->
+Card Number: 4242 4242 4242 4242
+Expiry: Any future date (e.g., 12/30)
+CVC: Any 3 digits (e.g., 123)
+
