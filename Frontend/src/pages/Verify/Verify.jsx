@@ -5,43 +5,46 @@ import { StoreContext } from '../../Context/StoreContext'
 import axios from 'axios'
 
 const Verify = () => {
-    const [searchParams] = useSearchParams();
-    const success = searchParams.get("success")
-    const orderId = searchParams.get("orderId")
-    
-    const { url } = useContext(StoreContext);
-    const navigate = useNavigate();
+  const [searchParams] = useSearchParams()
+  const success = searchParams.get("success")
+  const { url, setCartItems } = useContext(StoreContext)
+  const navigate = useNavigate()
 
+  useEffect(() => {
     const verifyPayment = async () => {
-        // Prevent running if orderId is missing
-        if (!orderId) {
-            navigate("/");
-            return;
-        }
+      const orderId = localStorage.getItem('pendingOrderId')
 
-        try {
-            const response = await axios.post(url + "/api/order/verify", { success, orderId });
-            if (response.data.success) {
-                // Redirecting to MyOrders
-                navigate("/myorders");
-            } else {
-                navigate("/");
-            }
-        } catch (error) {
-            console.log("Verification Error:", error);
-            navigate("/");
+      if (!orderId) {
+        navigate("/")
+        return
+      }
+
+      try {
+        const response = await axios.post(url + "/api/order/verify", { success, orderId })
+        localStorage.removeItem('pendingOrderId')
+
+        if (response.data.success) {
+          setCartItems({})
+          navigate("/myorders")
+        } else {
+          navigate("/cart")
         }
+      } catch (error) {
+        console.log("Verification Error:", error)
+        localStorage.removeItem('pendingOrderId')
+        navigate("/cart")
+      }
     }
 
-    useEffect(() => {
-        verifyPayment();
-    }, [url]); // Trigger when url is ready
+    if (url) verifyPayment()
+  }, [url])
 
-    return (
-        <div className='verify'>
-            <div className="spinner"></div>
-        </div>
-    )
+  return (
+    <div className='verify'>
+      <div className="spinner"></div>
+      <p>Verifying your payment...</p>
+    </div>
+  )
 }
 
-export default Verify;
+export default Verify

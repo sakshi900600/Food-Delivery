@@ -1,30 +1,44 @@
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 import Navbar from './components/Navbar/Navbar'
 import Sidebar from './components/Sidebar/Sidebar'
-import { Route, Routes } from 'react-router-dom'
+import { Route, Routes, Navigate } from 'react-router-dom'
 import Add from './pages/Add/Add'
 import List from './pages/List/List'
 import Orders from './pages/Orders/Orders'
-import { ToastContainer } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
-
-
+import Login from './pages/Login/Login'
+import { ToastContainer } from 'react-toastify'
+import 'react-toastify/dist/ReactToastify.css'
 
 const App = () => {
+  const url = import.meta.env.VITE_API_URL || "https://naanstop.onrender.com"
+  const [token, setToken] = useState(localStorage.getItem('adminToken') || '')
 
-  const url = import.meta.env.VITE_API_URL || "https://naanstop.onrender.com";
+  const logout = () => {
+    setToken('')
+    localStorage.removeItem('adminToken')
+  }
+
+  if (!token) {
+    return (
+      <>
+        <ToastContainer />
+        <Login url={url} setToken={setToken} />
+      </>
+    )
+  }
 
   return (
     <div>
-      <ToastContainer/>
-      <Navbar/>
+      <ToastContainer />
+      <Navbar onLogout={logout} />
       <hr />
       <div className="app-content">
-        <Sidebar/>
+        <Sidebar />
         <Routes>
-          <Route path='/add' element={<Add url={url}/>}/>
-          <Route path='/list' element={<List url={url}/>}/>
-          <Route path='/orders' element={<Orders url={url}/>}/>
+          <Route path='/' element={<Navigate to='/list' />} />
+          <Route path='/add' element={<Add url={url} token={token} />} />
+          <Route path='/list' element={<List url={url} token={token} />} />
+          <Route path='/orders' element={<Orders url={url} token={token} />} />
         </Routes>
       </div>
     </div>

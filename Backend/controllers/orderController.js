@@ -4,25 +4,28 @@ import Stripe from "stripe";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
+const MINIMUM_AMOUNT_PAISE = 5000; // ₹50 minimum (5000 paise) — safely above Stripe's limit
+
 const placeOrder = async (req, res) => {
   const frontend_url = process.env.PRODUCTION_FRONTEND_URL || "http://localhost:5173"
 
   try {
-    const newOrder = new orderModel({
-      userId: req.body.userId,
-      items: req.body.items,
-      amount: req.body.amount,
-      address: req.body.address
-    })
+    const totalAmount = req.body.amount; // in rupees (e.g. 22)
+    const totalAmountPaise = totalAmount * 100;
 
-    await newOrder.save()
-    await userModel.findByIdAndUpdate(req.body.userId, { cartData: {} })
+    // Block before hitting Stripe if amount is too small
+    if (totalAmountPaise < MINIMUM_AMOUNT_PAISE) {
+      return res.json({
+        success: false,
+        message: `Minimum order amount is ₹${MINIMUM_AMOUNT_PAISE / 100}. Your total is ₹${totalAmount}.`
+      })
+    }
 
     const line_items = req.body.items.map((item) => ({
       price_data: {
         currency: "inr",
         product_data: { name: item.name },
-        unit_amount: item.price * 100
+        unit_amount: item.price * 100  // paise
       },
       quantity: item.quantity
     }))
@@ -31,22 +34,39 @@ const placeOrder = async (req, res) => {
       price_data: {
         currency: "inr",
         product_data: { name: "Delivery Charges" },
-        unit_amount: 2 * 100
+        unit_amount: 200  // ₹2 = 200 paise
       },
       quantity: 1
     })
 
+    // Create Stripe session FIRST — before saving to DB
     const session = await stripe.checkout.sessions.create({
       line_items,
       mode: 'payment',
-      success_url: `${frontend_url}/verify?success=true&orderId=${newOrder._id}`,
-      cancel_url: `${frontend_url}/verify?success=false&orderId=${newOrder._id}`
+      success_url: `${frontend_url}/verify?success=true&orderId=PENDING`,
+      cancel_url: `${frontend_url}/verify?success=false&orderId=PENDING`
     })
 
-    res.json({ success: true, session_url: session.url })
+    // Only save to DB if Stripe session was created successfully
+    const newOrder = new orderModel({
+      userId: req.body.userId,
+      items: req.body.items,
+      amount: totalAmount,
+      address: req.body.address,
+      stripeSessionId: session.id  // store session ID to verify later
+    })
+
+    await newOrder.save()
+    await userModel.findByIdAndUpdate(req.body.userId, { cartData: {} })
+
+    // Update URLs with real order ID
+    await stripe.checkout.sessions.update ? null : null // not needed, use metadata instead
+
+    res.json({ success: true, session_url: session.url, orderId: newOrder._id })
+
   } catch (error) {
     console.log(error)
-    res.json({ success: false, message: "Error" })
+    res.json({ success: false, message: error.message || "Error placing order" })
   }
 }
 
@@ -57,8 +77,9 @@ const verifyOrder = async (req, res) => {
       await orderModel.findByIdAndUpdate(orderId, { payment: true })
       res.json({ success: true, message: "Paid" })
     } else {
+      // Payment cancelled/failed — delete the order from DB
       await orderModel.findByIdAndDelete(orderId)
-      res.json({ success: false, message: "Not Paid" })
+      res.json({ success: false, message: "Payment cancelled" })
     }
   } catch (error) {
     console.log(error)
@@ -68,7 +89,8 @@ const verifyOrder = async (req, res) => {
 
 const userOrders = async (req, res) => {
   try {
-    const orders = await orderModel.find({ userId: req.body.userId })
+    // Only show paid orders to the user
+    const orders = await orderModel.find({ userId: req.body.userId, payment: true })
     res.json({ success: true, data: orders })
   } catch (error) {
     console.log(error)

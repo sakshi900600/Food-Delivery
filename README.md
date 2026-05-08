@@ -319,21 +319,12 @@ cd Backend/admin
 npm run dev
 ```
 
-### Development Guides
-
-- **Backend Development:** See [Backend/DEVELOPMENT.md](Backend/DEVELOPMENT.md)
-- **Frontend Development:** See [Frontend/Flow.md](Frontend/Flow.md)
-- **Admin Development:** See [Backend/admin/flow.md](Backend/admin/flow.md)
-
 ---
 
 ## 📖 Documentation
 
 ### Backend Documentation
-- [Backend README](Backend/README.md) - Backend overview & setup
 - [API Documentation](Backend/API_DOCUMENTATION.md) - Complete API reference
-- [Deployment Guide](Backend/DEPLOYMENT.md) - Production deployment
-- [Development Guide](Backend/DEVELOPMENT.md) - Development workflow
 
 ### Frontend Documentation
 - [Frontend Flow](Frontend/Flow.md) - Frontend setup & structure
@@ -347,7 +338,6 @@ npm run dev
 ```
 POST   /api/user/register    - Register new user
 POST   /api/user/login       - Login user
-GET    /api/user/profile     - Get user profile
 ```
 
 ### Food Endpoints
@@ -391,3 +381,11 @@ PUT    /api/order/status     - Update status (Admin)
 ## 📄 License
 
 This project is licensed under the ISC License.
+
+
+
+#### Testing the deployed app:
+```
+email: sakshi@gmail.com
+password: password
+```

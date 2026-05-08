@@ -4,6 +4,7 @@ import foodRouter from '../routes/foodRoute.js'
 import userRouter from '../routes/userRoute.js'
 import cartRouter from '../routes/cartRoute.js'
 import orderRoute from '../routes/orderRoute.js'
+import adminRouter from '../routes/adminRoute.js'
 import { logger } from '../utils/logger.js'
 import { sendErrorResponse, sendSuccessResponse } from '../utils/errorHandler.js'
 import 'dotenv/config'
@@ -51,6 +52,7 @@ app.use('/api/user', userRouter)
 app.use('/api/cart', cartRouter)
 app.use('/api/order', orderRoute)
 app.use('/image', express.static('uploads'))
+app.use('/api/admin', adminRouter)
 
 // Root
 app.get('/', (req, res) => {
