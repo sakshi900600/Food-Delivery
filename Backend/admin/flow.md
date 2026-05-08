@@ -99,3 +99,8 @@ main.jsx:
 7. create async fun to handle status change. & apply it on select onchange.
 
 8. test everything & done 🙌👍(❁´◡`❁)(❁´◡`❁)
+
+
+<!-- Deployment Issue -->
+When you visit /list directly or refresh the page, Vercel tries to find a file called list — but it's a React SPA, so all routes must go through index.html.
+ 
