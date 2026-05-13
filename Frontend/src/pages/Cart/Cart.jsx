@@ -10,12 +10,13 @@ const PROMO_CODES = {
 }
 
 const Cart = () => {
-  const { cartItems, food_list, removeFromCart, getTotalCartAmount, url } = useContext(StoreContext)
+  const { cartItems, food_list, removeFromCart, getTotalCartAmount, url, token } = useContext(StoreContext)
   const navigate = useNavigate()
 
   const [promoInput, setPromoInput] = useState("")
   const [appliedPromo, setAppliedPromo] = useState(null)
   const [promoError, setPromoError] = useState("")
+  const [showLoginPrompt, setShowLoginPrompt] = useState(false)
 
   const subtotal = getTotalCartAmount()
   const delivery = subtotal === 0 ? 0 : 2
@@ -41,6 +42,14 @@ const Cart = () => {
   }
 
   const cartHasItems = food_list.some(item => cartItems[item._id] > 0)
+
+  const handleCheckout = () => {
+    if (!token) {
+      setShowLoginPrompt(true)
+      return
+    }
+    navigate('/order')
+  }
 
   return (
     <div className='cart'>
@@ -107,7 +116,7 @@ const Cart = () => {
                   <p><b>Total</b></p>
                   <p><b>₹{total}</b></p>
                 </div>
-                <button onClick={() => navigate('/order')}>PROCEED TO CHECKOUT</button>
+                <button onClick={handleCheckout}>PROCEED TO CHECKOUT</button>
               </div>
             </div>
 
@@ -139,6 +148,40 @@ const Cart = () => {
           </div>
         )}
       </div>
+
+      {/* Login Prompt Modal */}
+      {showLoginPrompt && (
+        <div className="cart-login-prompt-overlay">
+          <div className="cart-login-prompt">
+            <div className="login-prompt-header">
+              <h2>Sign In Required</h2>
+              <button 
+                className="close-btn" 
+                onClick={() => setShowLoginPrompt(false)}
+              >
+                ✕
+              </button>
+            </div>
+            <div className="login-prompt-body">
+              <p>You need to sign in to your account to proceed with checkout.</p>
+              <p className="secondary-text">Log in to track your orders and manage your account.</p>
+            </div>
+            <div className="login-prompt-actions">
+              <button 
+                className="btn-primary"
+                onClick={() => {
+                  setShowLoginPrompt(false)
+                  // Trigger login popup by scrolling to navbar or dispatching event
+                  const loginEvent = new CustomEvent('openLoginPopup')
+                  window.dispatchEvent(loginEvent)
+                }}
+              >
+                Sign In / Sign Up
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

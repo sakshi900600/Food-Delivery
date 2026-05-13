@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import Navbar from './Component/Navbar/Navbar'
 import { Route, Routes } from 'react-router-dom'
 import Home from './pages/Home/Home'
@@ -12,6 +12,15 @@ import Verify from "./pages/Verify/Verify"
 const App = () => {
 
   const [showLogin, setShowLogin] = useState(false)
+
+  // Listen for custom event to open login popup
+  useEffect(() => {
+    const handleOpenLogin = () => {
+      setShowLogin(true)
+    }
+    window.addEventListener('openLoginPopup', handleOpenLogin)
+    return () => window.removeEventListener('openLoginPopup', handleOpenLogin)
+  }, [])
 
   return (
     <>
